@@ -8,12 +8,12 @@ const EmployeeTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
+        const res = await fetch(
           'https://geektrust.s3-ap-southeast-1.amazonaws.com/adminui-problem/members.json'
         );
-        if (!response.ok) throw new Error();
-        const jsonData = await response.json();
-        setData(jsonData);
+        if (!res.ok) throw new Error();
+        const result = await res.json();
+        setData(result);
       } catch (error) {
         alert('failed to fetch data');
       }
@@ -23,58 +23,84 @@ const EmployeeTable = () => {
   }, []);
 
   const totalPages = Math.ceil(data.length / itemsPerPage);
-  const currentData = data.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+  const paginatedData = data.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
-  const goToPreviousPage = () => {
-    setPage((prev) => (prev > 1 ? prev - 1 : prev));
+  const handleNext = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
+    }
+    // Do nothing if already on last page
   };
 
-  const goToNextPage = () => {
-    setPage((prev) => (prev < totalPages ? prev + 1 : prev));
+  const handlePrevious = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+    // Do nothing if already on first page
   };
 
   return (
-    <div>
-      <h2>Employee Data Table</h2>
+    <div style={{ padding: '40px', fontFamily: 'Arial, sans-serif' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Employee Data Table</h2>
 
-      <table data-testid="employee-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <table style={{
+        width: '100%',
+        borderCollapse: 'collapse',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+      }}>
         <thead>
           <tr style={{ backgroundColor: '#008061', color: '#fff' }}>
-            <th style={cellStyle}>ID</th>
-            <th style={cellStyle}>Name</th>
-            <th style={cellStyle}>Email</th>
-            <th style={cellStyle}>Role</th>
+            <th style={headerCellStyle}>ID</th>
+            <th style={headerCellStyle}>Name</th>
+            <th style={headerCellStyle}>Email</th>
+            <th style={headerCellStyle}>Role</th>
           </tr>
         </thead>
         <tbody>
-          {currentData.map((emp) => (
-            <tr key={emp.id}>
-              <td style={cellStyle}>{emp.id}</td>
-              <td style={cellStyle}>{emp.name}</td>
-              <td style={cellStyle}>{emp.email}</td>
-              <td style={cellStyle}>{emp.role}</td>
+          {paginatedData.map((item) => (
+            <tr key={item.id}>
+              <td style={cellStyle}>{item.id}</td>
+              <td style={cellStyle}>{item.name}</td>
+              <td style={cellStyle}>{item.email}</td>
+              <td style={cellStyle}>{item.role}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <div style={{ marginTop: '20px' }}>
+      <div style={{ textAlign: 'center', marginTop: '20px' }}>
         <button
           data-testid="prev-button"
-          onClick={goToPreviousPage}
-          disabled={page === 1}
+          onClick={handlePrevious}
+          style={{
+            ...buttonStyle,
+            backgroundColor: '#008061',
+            color: 'white'
+          }}
         >
           Previous
         </button>
 
-        <span data-testid="current-page" style={{ margin: '0 10px' }}>
+        <button
+          data-testid="current-page"
+          style={{
+            ...buttonStyle,
+            backgroundColor: '#fff',
+            color: '#000',
+            border: '1px solid #008061'
+          }}
+        >
           {page}
-        </span>
+        </button>
 
         <button
           data-testid="next-button"
-          onClick={goToNextPage}
-          disabled={page === totalPages}
+          onClick={handleNext}
+          style={{
+            ...buttonStyle,
+            backgroundColor: '#008061',
+            color: 'white'
+          }}
         >
           Next
         </button>
@@ -83,10 +109,23 @@ const EmployeeTable = () => {
   );
 };
 
-const cellStyle = {
-  padding: '10px',
-  border: '1px solid #ccc',
+const headerCellStyle = {
+  padding: '12px',
+  border: '1px solid #ddd',
   textAlign: 'left',
+};
+
+const cellStyle = {
+  padding: '12px',
+  border: '1px solid #ddd',
+};
+
+const buttonStyle = {
+  padding: '8px 16px',
+  margin: '0 8px',
+  border: 'none',
+  borderRadius: '4px',
+  cursor: 'pointer',
 };
 
 export default EmployeeTable;
